@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.REACT_APP_API_URL, // import.meta.env.VITE_API_URL,
+  baseURL:
+    "https://backend-stage-nacz9gcse-mariems-projects-43bec416.vercel.app/api", // import.meta.env.REACT_APP_API_URL, // import.meta.env.VITE_API_URL,
 });
 //  Intercepteur : Ajouter Authorization: Bearer ${token} si disponible
 // Ajouter le token JWT automatiquement dans chaque requête
