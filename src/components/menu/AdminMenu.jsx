@@ -11,6 +11,8 @@ import {
   Typography,
   Avatar,
   Divider,
+  IconButton,
+  Button,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -20,11 +22,12 @@ import {
   People as PeopleIcon,
   Email as EmailIcon,
   ShoppingCart as CartIcon,
+  Logout as LogoutIcon,
 } from "@mui/icons-material";
 
 const drawerWidth = 240;
 
-function AdminMenu({ role }) {
+function AdminMenu({ role, onLogout }) {
   const icons = {
     "/admin": <DashboardIcon />,
     "/admin/categories": <CategoryIcon />,
@@ -58,6 +61,23 @@ function AdminMenu({ role }) {
             src="https://res.cloudinary.com/dx90dxjb0/image/upload/v1754422758/Capture_d_%C3%A9cran_2025-08-05_203339_tx4rmd.png"
             sx={{ width: 40, height: 40 }}
           />
+          {onLogout && (
+            <Button
+              onClick={onLogout}
+              startIcon={<LogoutIcon />}
+              sx={{
+                ml: 2,
+                color: "#5D4037",
+                textTransform: "none",
+                fontWeight: 500,
+                "&:hover": {
+                  backgroundColor: "#F8F5F2",
+                },
+              }}
+            >
+              Déconnexion
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
 

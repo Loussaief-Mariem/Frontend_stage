@@ -36,7 +36,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getAllCategories } from "../../services/categorieService";
 
-const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
+const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0, onLogout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [categories, setCategories] = useState([]);
   const [openSubMenu, setOpenSubMenu] = useState({});
@@ -75,7 +75,9 @@ const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
 
   const handleLogout = () => {
     handleMenuClose();
-    console.log("Déconnexion");
+    if (onLogout) {
+      onLogout();
+    }
   };
 
   const handleCartClick = () => {
@@ -345,6 +347,11 @@ const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
             px: 2,
             fontSize: "0.8rem",
             borderBottom: "1px solid #e0e0e0",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: (theme) => theme.zIndex.drawer + 2,
           }}
         >
           <Container maxWidth="xl">
@@ -389,11 +396,13 @@ const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
 
       {/* Niveau 2: Logo, recherche et icônes */}
       <AppBar
-        position="static"
+        position="fixed"
         sx={{
           backgroundColor: "white",
           color: "#5D4037",
           boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          top: { xs: 0, md: "32px" }, // Ajuster la position pour la barre de contact
         }}
       >
         <Toolbar sx={{ minHeight: "90px !important", py: 2 }}>
@@ -475,6 +484,11 @@ const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
             backgroundColor: "#f8f5f2",
             borderBottom: "1px solid #e0e0e0",
             py: 1.5,
+            position: "fixed",
+            top: { xs: "90px", md: "122px" }, // Position en dessous de l'AppBar
+            left: 0,
+            right: 0,
+            zIndex: (theme) => theme.zIndex.drawer,
           }}
         >
           <Container maxWidth="xl">
@@ -486,6 +500,23 @@ const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0 }) => {
                 gap: 4,
               }}
             >
+              {/* Lien Accueil */}
+              <Button
+                color="inherit"
+                onClick={() => navigate("/")}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  textTransform: "uppercase",
+                  color: "#5D4037",
+                  "&:hover": {
+                    backgroundColor: "rgba(93, 64, 55, 0.05)",
+                  },
+                }}
+              >
+                Accueil
+              </Button>
+
               {topLevelFamilies.map(
                 (famille) =>
                   categoriesByFamily[famille] && (

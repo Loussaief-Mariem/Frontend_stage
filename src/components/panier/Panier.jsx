@@ -164,7 +164,7 @@ function Panier() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ width: "100%", maxWidth: "100%" }}>
       <Typography
         variant="h4"
         gutterBottom
