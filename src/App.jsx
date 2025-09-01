@@ -15,6 +15,7 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
+import HomePage from "./components/Home/HomePage";
 function App() {
   const [role, setRole] = useState("user"); // "admin" ou "user"
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -122,7 +123,9 @@ function App() {
                 {/* Routes User */}
 
                 {/* <Route path="/" element={<HomePage />} /> */}
+                {/* Routes User */}
                 <Route path="/contact" element={<ContactClient />} />
+
                 <Route
                   path="/connexion"
                   element={<Login onLoginSuccess={handleLoginSuccess} />}
@@ -133,6 +136,9 @@ function App() {
                   path="/reset-password/:id/:token"
                   element={<ResetPassword />}
                 />
+                <Route path="*" element={<HomePage />} />
+                {/* Ajoutez une route par défaut */}
+                {/* <Route path="/" element=votre composant HomePage ici /> */}
               </Routes>
             </Container>
           </Box>
