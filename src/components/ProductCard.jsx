@@ -8,39 +8,22 @@ import {
   IconButton,
   Button,
   Chip,
-  Rating,
   Tooltip,
-  Badge,
 } from "@mui/material";
-import {
-  Favorite,
-  FavoriteBorder,
-  ShoppingCart,
-  Visibility,
-  LocalMall,
-} from "@mui/icons-material";
+import { ShoppingCart, Visibility, LocalMall } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 
 const ProductCard = ({ product, showActions = true }) => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [isFavorite, setIsFavorite] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   // Vérifier si le produit est en stock
   const isOutOfStock = product.stock <= 0;
   const isLowStock =
     product.stock > 0 && product.stock <= product.seuilAlertStock;
-
-  // Gestion des favoris
-  const handleToggleFavorite = (e) => {
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    enqueueSnackbar(!isFavorite ? "Ajouté aux favoris" : "Retiré des favoris", {
-      variant: "success",
-    });
-  };
+  const shouldDisableButton = isOutOfStock || isLowStock;
 
   // Ajouter au panier
   const handleAddToCart = (e) => {
@@ -119,35 +102,13 @@ const ProductCard = ({ product, showActions = true }) => {
         )}
       </Box>
 
-      {/* Bouton favori */}
-      {showActions && (
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            zIndex: 2,
-            backgroundColor: "white",
-            "&:hover": { backgroundColor: "grey.50" },
-          }}
-          onClick={handleToggleFavorite}
-        >
-          {isFavorite ? (
-            <Favorite color="error" />
-          ) : (
-            <FavoriteBorder color="disabled" />
-          )}
-        </IconButton>
-      )}
-
       {/* Image du produit */}
-      <Box sx={{ position: "relative", overflow: "hidden" }}>
+      <Box sx={{ position: "relative", overflow: "hidden", height: "160px", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <CardMedia
           component="img"
-          height="250"
           image={
             imageError || !product.image
-              ? "https://via.placeholder.com/300x300?text=Image+Non+Disponible"
+              ? "https://via.placeholder.com/300x160?text=Image+Non+Disponible"
               : product.image
           }
           alt={product.nom}
@@ -155,7 +116,12 @@ const ProductCard = ({ product, showActions = true }) => {
           className="product-image"
           sx={{
             transition: "transform 0.3s ease",
-            objectFit: "cover",
+            objectFit: "contain",
+            width: "100%",
+            height: "100%",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            padding: "6px",
           }}
         />
 
@@ -191,7 +157,13 @@ const ProductCard = ({ product, showActions = true }) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Ajouter au panier">
+            <Tooltip
+              title={
+                shouldDisableButton
+                  ? "Produit indisponible"
+                  : "Ajouter au panier"
+              }
+            >
               <span>
                 <IconButton
                   size="small"
@@ -200,7 +172,7 @@ const ProductCard = ({ product, showActions = true }) => {
                     backgroundColor: "rgba(255,255,255,0.2)",
                   }}
                   onClick={handleAddToCart}
-                  disabled={isOutOfStock}
+                  disabled={shouldDisableButton}
                 >
                   <ShoppingCart fontSize="small" />
                 </IconButton>
@@ -211,13 +183,13 @@ const ProductCard = ({ product, showActions = true }) => {
       </Box>
 
       {/* Contenu de la carte */}
-      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+      <CardContent sx={{ flexGrow: 1, p: 1.5 }}>
         {/* Catégorie */}
         {product.categorieId && (
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ display: "block", mb: 0.5 }}
+            sx={{ display: "block", mb: 0.5, fontSize: "0.65rem" }}
           >
             {product.categorieId.nom}
           </Typography>
@@ -229,8 +201,9 @@ const ProductCard = ({ product, showActions = true }) => {
           component="h3"
           sx={{
             fontWeight: 600,
-            mb: 1,
-            height: "48px",
+            mb: 0.5,
+            fontSize: "0.85rem",
+            height: "32px",
             overflow: "hidden",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -246,54 +219,28 @@ const ProductCard = ({ product, showActions = true }) => {
             variant="body2"
             color="text.secondary"
             sx={{
-              mb: 2,
-              height: "40px",
+              mb: 1,
+              height: "24px",
               overflow: "hidden",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
+              fontSize: "0.7rem",
             }}
           >
             {product.description}
           </Typography>
         )}
 
-        {/* Rating */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Rating value={4.5} size="small" readOnly precision={0.5} />
-          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-            (128 avis)
-          </Typography>
-        </Box>
-
         {/* Prix */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
           <Typography
             variant="h5"
             color="#5D4037"
-            sx={{ fontWeight: 700, mr: 1 }}
+            sx={{ fontWeight: 700, mr: 1, fontSize: "1rem" }}
           >
             {formatPrice(product.prix)} TND
           </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ textDecoration: "line-through" }}
-          >
-            {formatPrice(product.prix * 1.2)} TND
-          </Typography>
-        </Box>
-
-        {/* Informations stock */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            {isOutOfStock ? "Rupture de stock" : `${product.stock} en stock`}
-          </Typography>
-          {product.volume && (
-            <Typography variant="caption" color="text.secondary">
-              {product.volume}
-            </Typography>
-          )}
         </Box>
 
         {/* Bouton d'action principal */}
@@ -303,14 +250,17 @@ const ProductCard = ({ product, showActions = true }) => {
             fullWidth
             startIcon={<LocalMall />}
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={shouldDisableButton}
+            size="small"
             sx={{
               backgroundColor: "#5D4037",
               "&:hover": { backgroundColor: "#4E342E" },
               "&:disabled": { backgroundColor: "grey.300" },
+              fontSize: "0.75rem",
+              py: 0.5,
             }}
           >
-            {isOutOfStock ? "Rupture" : "Ajouter au panier"}
+            {shouldDisableButton ? "Rupture de stock" : "Ajouter au panier"}
           </Button>
         )}
       </CardContent>

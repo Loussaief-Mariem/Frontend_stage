@@ -59,7 +59,7 @@ const HeaderCarousel = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="400px"
+        height="600px"
         bgcolor="grey.100"
       >
         <Typography>Chargement...</Typography>
@@ -73,7 +73,7 @@ const HeaderCarousel = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="400px"
+        height="600px"
         bgcolor="grey.100"
       >
         <Typography>Aucun header disponible</Typography>
@@ -88,7 +88,7 @@ const HeaderCarousel = () => {
       {/* Image du header */}
       <Box
         sx={{
-          height: isMobile ? "300px" : "500px",
+          height: isMobile ? "400px" : "600px",
           backgroundImage: `url(${currentHeader.imageUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -98,6 +98,8 @@ const HeaderCarousel = () => {
           justifyContent: "center",
           position: "relative",
           transition: "background-image 0.5s ease",
+          width: "100%",
+          minHeight: isMobile ? "400px" : "600px",
         }}
       >
         {/* Overlay sombre */}
@@ -113,13 +115,14 @@ const HeaderCarousel = () => {
         />
 
         {/* Contenu texte */}
-        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2, height: "100%", display: "flex", alignItems: "flex-end", pb: 4 }}>
           <Box
             sx={{
-              textAlign: "center",
+              textAlign: "left",
               color: "white",
-              maxWidth: "800px",
-              margin: "0 auto",
+              maxWidth: "600px",
+              margin: "0",
+              pl: 0,
             }}
           >
             <Typography
@@ -127,8 +130,8 @@ const HeaderCarousel = () => {
               component="h1"
               sx={{
                 fontWeight: 700,
-                fontSize: isMobile ? "2.5rem" : "3.5rem",
-                mb: 2,
+                fontSize: isMobile ? "1.2rem" : "1.6rem",
+                mb: 1,
                 textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
               }}
             >
@@ -139,8 +142,8 @@ const HeaderCarousel = () => {
               <Typography
                 variant="h5"
                 sx={{
-                  mb: 3,
-                  fontSize: isMobile ? "1.1rem" : "1.5rem",
+                  mb: 2,
+                  fontSize: isMobile ? "0.7rem" : "0.9rem",
                   textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
                 }}
               >

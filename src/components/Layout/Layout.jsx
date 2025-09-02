@@ -7,7 +7,7 @@ const Layout = ({ children }) => {
   return (
     <Box
       sx={{
-        pt: `${menuHeight}px`,
+        pt: `${menuHeight + 50}px`,
         minHeight: "100vh",
         backgroundColor: "#fafafa",
       }}

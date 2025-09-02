@@ -78,13 +78,23 @@ export const deleteProduit = async (id) => {
 };
 
 // Récupérer les best-sellers
-export const getBestSellers = async (limit = 10) => {
+// Récupérer les best-sellers
+export const getBestSellers = async (limit = 4) => {
   try {
     const res = await api.get(`/produits/best-sellers?limit=${limit}`);
     return res.data;
   } catch (error) {
     console.error("Erreur récupération best-sellers:", error);
-    throw error;
+
+    // Fallback en cas d'erreur
+    try {
+      // Si l'API des best-sellers échoue, on récupère des produits récents
+      const res = await api.get(`/produits/pagines?page=1&limit=${limit}`);
+      return res.data.produits || [];
+    } catch (fallbackError) {
+      console.error("Erreur fallback:", fallbackError);
+      return [];
+    }
   }
 };
 

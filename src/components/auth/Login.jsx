@@ -61,7 +61,6 @@ const Login = ({ onLoginSuccess }) => {
 
   return (
     <Layout>
-      {" "}
       {/* AJOUT DU LAYOUT */}
       <Container maxWidth="sm" sx={{ mt: 4, mb: 4, py: 4 }}>
         <Paper
