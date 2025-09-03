@@ -86,7 +86,6 @@ export const getBestSellers = async (limit = 4) => {
   } catch (error) {
     console.error("Erreur récupération best-sellers:", error);
 
-    // Fallback en cas d'erreur
     try {
       // Si l'API des best-sellers échoue, on récupère des produits récents
       const res = await api.get(`/produits/pagines?page=1&limit=${limit}`);

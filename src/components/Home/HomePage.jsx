@@ -4,23 +4,18 @@ import {
   Container,
   Typography,
   Grid,
-  Button,
   CircularProgress,
   Alert,
-  Card,
-  CardContent,
-  CardMedia,
 } from "@mui/material";
-import { ArrowForward } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+
 import HeaderCarousel from "../Carousel/HeaderCarousel";
 import ProductCard from "../ProductCard";
 import { getProduitsPagines } from "../../services/produitService";
 import { getBestSellers } from "../../services/produitService";
 import Layout from "../Layout/Layout";
+import InsertPanierModal from "./InsertPanierModal";
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [newProducts, setNewProducts] = useState([]);
@@ -79,33 +74,34 @@ const HomePage = () => {
 
   return (
     <Layout>
-      <Box sx={{ mb: 6.25 }}> {/* 50px = 6.25 * 8px (theme spacing) */}
+      <Box sx={{ mb: 6.25 }}>
+        {" "}
+        {/* 50px = 6.25 * 8px (theme spacing) */}
         {/* Niveau 1: Carousel Header */}
         <HeaderCarousel />
-
         {/* Niveau 2: Nouveaux Produits */}
         <Container maxWidth="xl" sx={{ py: 8 }}>
           <Box sx={{ textAlign: "left", mb: 6 }}>
             <Typography
-              variant="h2"
+              variant="h3"
               component="h2"
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 color: "#5D4037",
-                mb: 3,
-                fontSize: { xs: "1.8rem", md: "2.2rem" },
+                mb: 2,
+                fontSize: { xs: "1.4rem", md: "1.6rem" },
               }}
             >
               Nouveautés
             </Typography>
             <Typography
-              variant="h6"
+              variant="body1"
               color="text.secondary"
               sx={{
                 maxWidth: "600px",
                 margin: "0",
-                mb: 6,
-                fontSize: { xs: "0.9rem", md: "1rem" },
+                mb: 4,
+                fontSize: { xs: "0.85rem", md: "0.9rem" },
                 fontWeight: 400,
               }}
             >
@@ -121,30 +117,29 @@ const HomePage = () => {
             ))}
           </Grid>
         </Container>
-
         {/* Niveau 3: Best Sellers */}
         <Container maxWidth="xl" sx={{ py: 8, backgroundColor: "#f8f5f2" }}>
           <Box sx={{ textAlign: "left", mb: 6 }}>
             <Typography
-              variant="h2"
+              variant="h3"
               component="h2"
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 color: "#5D4037",
-                mb: 3,
-                fontSize: { xs: "1.8rem", md: "2.2rem" },
+                mb: 2,
+                fontSize: { xs: "1.4rem", md: "1.6rem" },
               }}
             >
               Meilleures Ventes
             </Typography>
             <Typography
-              variant="h6"
+              variant="body1"
               color="text.secondary"
               sx={{
                 maxWidth: "600px",
                 margin: "0",
-                mb: 6,
-                fontSize: { xs: "0.9rem", md: "1rem" },
+                mb: 4,
+                fontSize: { xs: "0.85rem", md: "0.9rem" },
                 fontWeight: 400,
               }}
             >

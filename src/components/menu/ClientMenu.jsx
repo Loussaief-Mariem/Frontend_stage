@@ -36,7 +36,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getAllCategories } from "../../services/categorieService";
 
-const ClientMenu = ({ isAuthenticated = false, cartItemCount = 0, onLogout }) => {
+const ClientMenu = ({
+  isAuthenticated = false,
+  cartItemCount = 0,
+  onLogout,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [categories, setCategories] = useState([]);
   const [openSubMenu, setOpenSubMenu] = useState({});

@@ -16,12 +16,50 @@ import Register from "./components/auth/Register";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import HomePage from "./components/Home/HomePage";
-function App() {
-  const [role, setRole] = useState("user"); // "admin" ou "user"
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(3);
+import {
+  getPanierActif,
+  getNombreArticles,
+  getNombreArticlesLocal,
+  getPanierLocal,
+  savePanierLocal,
+  createPanier,
+  ajouterArticlePanier,
+} from "./services/panierService";
+import AfichierPanierClient from "./components/panier/AfichierPanierClient";
 
-  // Vérifier l'authentification et le rôle au chargement de l'app
+function App() {
+  const [role, setRole] = useState("user");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  // Fonction pour mettre à jour le compteur du panier
+  const updateCartItemCount = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      if (user._id && isAuthenticated) {
+        // Utilisateur connecté - récupérer depuis l'API
+        const panier = await getPanierActif(user._id);
+        if (panier) {
+          const articlesCount = await getNombreArticles(panier._id);
+          setCartItemCount(articlesCount.nombreArticles || 0);
+        } else {
+          setCartItemCount(0);
+        }
+      } else {
+        // Visiteur - récupérer depuis le stockage local
+        const count = getNombreArticlesLocal();
+        setCartItemCount(count);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du panier:", error);
+      // En cas d'erreur, utiliser le panier local
+      const count = getNombreArticlesLocal();
+      setCartItemCount(count);
+    }
+  };
+
+  // Vérifier l'authentification et le panier au chargement de l'app
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
@@ -31,18 +69,74 @@ function App() {
         const userData = JSON.parse(user);
         setIsAuthenticated(true);
         setRole(userData.role || "user");
+        updateCartItemCount();
       } catch (error) {
         console.error("Erreur lors du parsing des données utilisateur:", error);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        // Utiliser le panier local après déconnexion
+        updateCartItemCount();
       }
+    } else {
+      // Utiliser le panier local pour les visiteurs
+      updateCartItemCount();
     }
+  }, []);
+
+  // Écouter les événements de mise à jour du panier
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      updateCartItemCount();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
   // Fonction pour gérer la connexion réussie
   const handleLoginSuccess = (userData) => {
     setIsAuthenticated(true);
     setRole(userData.role || "user");
+
+    // Après connexion, migrer le panier local vers le panier de l'utilisateur
+    const panierLocal = getPanierLocal();
+    if (panierLocal.articles.length > 0) {
+      // Ici, vous devriez ajouter une fonction pour migrer le panier local vers le panier API
+      migrerPanierVersAPI(userData._id, panierLocal);
+    }
+
+    updateCartItemCount();
+  };
+
+  // Fonction pour migrer le panier local vers l'API
+  const migrerPanierVersAPI = async (userId, panierLocal) => {
+    try {
+      // Récupérer ou créer un panier actif pour l'utilisateur
+      let panier = await getPanierActif(userId);
+      if (!panier) {
+        panier = await createPanier({ clientId: userId, statut: "actif" });
+      }
+
+      // Ajouter chaque article du panier local au panier API
+      for (const article of panierLocal.articles) {
+        await ajouterArticlePanier(
+          panier._id,
+          article.produitId,
+          article.quantite
+        );
+      }
+
+      // Vider le panier local après migration réussie
+      savePanierLocal({ articles: [], total: 0 });
+
+      // Déclencher une mise à jour du compteur
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+    } catch (error) {
+      console.error("Erreur lors de la migration du panier:", error);
+    }
   };
 
   // Fonction pour gérer la déconnexion
@@ -51,9 +145,12 @@ function App() {
     localStorage.removeItem("user");
     setIsAuthenticated(false);
     setRole("user");
+
+    // Mettre à jour le compteur avec le panier local
+    updateCartItemCount();
+
     window.location.href = "/";
   };
-
   return (
     <Router>
       {/* Structure conditionnelle pour admin vs client */}
@@ -121,11 +218,8 @@ function App() {
             >
               <Routes>
                 {/* Routes User */}
-
-                {/* <Route path="/" element={<HomePage />} /> */}
-                {/* Routes User */}
                 <Route path="/contact" element={<ContactClient />} />
-
+                <Route path="/panier" element={<AfichierPanierClient />} />
                 <Route
                   path="/connexion"
                   element={<Login onLoginSuccess={handleLoginSuccess} />}
@@ -137,8 +231,6 @@ function App() {
                   element={<ResetPassword />}
                 />
                 <Route path="*" element={<HomePage />} />
-                {/* Ajoutez une route par défaut */}
-                {/* <Route path="/" element=votre composant HomePage ici /> */}
               </Routes>
             </Container>
           </Box>
