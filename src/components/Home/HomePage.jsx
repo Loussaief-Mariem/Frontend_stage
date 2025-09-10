@@ -13,7 +13,6 @@ import ProductCard from "../ProductCard";
 import { getProduitsPagines } from "../../services/produitService";
 import { getBestSellers } from "../../services/produitService";
 import Layout from "../Layout/Layout";
-import InsertPanierModal from "./InsertPanierModal";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);

@@ -168,75 +168,82 @@ function Client() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {clients.map((client) => (
-                    <TableRow key={client._id} hover>
-                      <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Avatar
-                            src={`https://ui-avatars.com/api/?name=${client.utilisateurId.nom}+${client.utilisateurId.prenom}`}
-                            sx={{ width: 40, height: 40, mr: 2 }}
-                          />
-                          <Box>
-                            <Typography fontWeight={600}>
-                              {client.utilisateurId.nom}{" "}
-                              {client.utilisateurId.prenom}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Inscrit le{" "}
-                              {new Date(
-                                client.dateInscription
-                              ).toLocaleDateString("fr-FR")}
-                            </Typography>
+                  {clients.map((client) => {
+                    // Vérifier si utilisateurId existe
+                    if (!client.utilisateurId) {
+                      return null; // Ne pas afficher les clients sans utilisateurId
+                    }
+                    
+                    return (
+                      <TableRow key={client._id} hover>
+                        <TableCell>
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Avatar
+                              src={`https://ui-avatars.com/api/?name=${client.utilisateurId.nom}+${client.utilisateurId.prenom}`}
+                              sx={{ width: 40, height: 40, mr: 2 }}
+                            />
+                            <Box>
+                              <Typography fontWeight={600}>
+                                {client.utilisateurId.nom}{" "}
+                                {client.utilisateurId.prenom}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Inscrit le{" "}
+                                {new Date(
+                                  client.dateInscription
+                                ).toLocaleDateString("fr-FR")}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{client.utilisateurId.email}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {client.telephone}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        {client.adresse || "Non renseignée"}
-                      </TableCell>
-                      <TableCell>
-                        <StatusChip
-                          label={
-                            client.utilisateurId.isActive ? "Actif" : "Inactif"
-                          }
-                          status={
-                            client.utilisateurId.isActive
-                              ? "active"
-                              : "inactive"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title="Voir détails">
-                          <IconButton onClick={() => handleOpenDetail(client)}>
-                            <ViewIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Modifier">
-                          <IconButton
-                            onClick={() => handleOpenEdit(client)}
-                            sx={{ color: "#1976D2" }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Supprimer">
-                          <IconButton
-                            onClick={() => handleDeleteClient(client._id)}
-                            sx={{ color: "#D32F2F" }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>
+                          <Typography>{client.utilisateurId.email}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {client.telephone}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {client.adresse || "Non renseignée"}
+                        </TableCell>
+                        <TableCell>
+                          <StatusChip
+                            label={
+                              client.utilisateurId.isActive ? "Actif" : "Inactif"
+                            }
+                            status={
+                              client.utilisateurId.isActive
+                                ? "active"
+                                : "inactive"
+                            }
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title="Voir détails">
+                            <IconButton onClick={() => handleOpenDetail(client)}>
+                              <ViewIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Modifier">
+                            <IconButton
+                              onClick={() => handleOpenEdit(client)}
+                              sx={{ color: "#1976D2" }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Supprimer">
+                            <IconButton
+                              onClick={() => handleDeleteClient(client._id)}
+                              sx={{ color: "#D32F2F" }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>

@@ -195,10 +195,10 @@ function Dashboard() {
                           variant="subtitle1"
                           sx={{ fontWeight: 600 }}
                         >
-                          {contact.nom}
+                          {contact.clientId?.utilisateurId?.nom || contact.email}
                         </Typography>
                         <Chip
-                          label={new Date(contact.date).toLocaleTimeString(
+                          label={new Date(contact.dateCreation).toLocaleTimeString(
                             "fr-FR"
                           )}
                           size="small"

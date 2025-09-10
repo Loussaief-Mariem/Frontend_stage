@@ -14,7 +14,6 @@ import {
 import { ShoppingCart, Visibility, LocalMall } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import InsertPanierModal from "../components/Home/InsertPanierModal";
 import ProductDetailModal from "../components/Home/ProductDetailModal";
 import { ajouterArticleLocal } from "../services/panierService";
 
@@ -22,7 +21,6 @@ const ProductCard = ({ product, showActions = true }) => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [imageError, setImageError] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
@@ -33,29 +31,30 @@ const ProductCard = ({ product, showActions = true }) => {
   const shouldDisableButton = isOutOfStock || isLowStock;
 
   // Ajouter au panier
+  // Ajouter au panier - TOUJOURS utiliser le localStorage
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
+    if (shouldDisableButton) return;
+
     try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setIsAddingToCart(true);
 
-      if (user._id) {
-        // Utilisateur connecté - utiliser l'API
-        setModalOpen(true);
-      } else {
-        // Visiteur - utiliser le stockage local
-        ajouterArticleLocal(product, 1);
+      // TOUJOURS utiliser le stockage local, même pour les utilisateurs connectés
+      ajouterArticleLocal(product, 1);
 
-        enqueueSnackbar(`${product.nom} ajouté au panier!`, {
-          variant: "success",
-          autoHideDuration: 2000,
-        });
+      enqueueSnackbar(`${product.nom} ajouté au panier!`, {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
 
-        window.dispatchEvent(new CustomEvent("cartUpdated"));
-      }
+      // Mettre à jour le compteur
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (error) {
       console.error("Erreur lors de l'ajout au panier:", error);
       enqueueSnackbar("Erreur lors de l'ajout au panier", { variant: "error" });
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -68,11 +67,6 @@ const ProductCard = ({ product, showActions = true }) => {
   // Fermer le modal de détail
   const handleCloseDetailModal = () => {
     setDetailModalOpen(false);
-  };
-
-  // Fermer le modal d'insertion panier
-  const handleCloseModal = () => {
-    setModalOpen(false);
   };
 
   // Voir les détails (navigation)
@@ -322,13 +316,6 @@ const ProductCard = ({ product, showActions = true }) => {
           )}
         </CardContent>
       </Card>
-
-      {/* Modal d'ajout au panier */}
-      <InsertPanierModal
-        product={product}
-        open={modalOpen}
-        onClose={handleCloseModal}
-      />
 
       {/* Modal de détail du produit */}
       <ProductDetailModal

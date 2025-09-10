@@ -59,3 +59,8 @@ export const annulerCommandeGlobale = async (id) => {
   const res = await api.put(`/commandes/${id}/annuler`);
   return res.data;
 };
+// Récupérer les commandes d’un client triées par date (récentes d’abord)
+export const getCommandesByClient = async (clientId) => {
+  const res = await api.get(`/commandes/client/${clientId}`);
+  return res.data;
+};

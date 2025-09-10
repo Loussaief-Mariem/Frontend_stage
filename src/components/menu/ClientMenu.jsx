@@ -300,16 +300,6 @@ const ClientMenu = ({
       {isAuthenticated ? (
         [
           <MenuItem
-            key="profile"
-            onClick={() => {
-              handleMenuClose();
-              navigate("/profil");
-            }}
-            sx={{ fontSize: "0.9rem", py: 1.5 }}
-          >
-            Mon Profil
-          </MenuItem>,
-          <MenuItem
             key="orders"
             onClick={() => {
               handleMenuClose();

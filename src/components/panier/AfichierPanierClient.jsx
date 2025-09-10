@@ -14,26 +14,31 @@ import {
   Divider,
   Paper,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Add, Remove, Delete } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
   getPanierActif,
-  getArticlesPanier,
-  updateQuantiteArticle,
-  supprimerArticlePanier,
-  getTotalPanier,
-} from "../../services/panierService";
-import {
+  createPanier,
+  ajouterArticlePanier,
   getPanierLocal,
   updateQuantiteArticleLocal,
   supprimerArticleLocal,
+  savePanierLocal,
+  updatePanier,
 } from "../../services/panierService";
-import Layout from "../Layout/Layout"; // IMPORT DU LAYOUT
+import { createCommande } from "../../services/commandeService";
+import Layout from "../Layout/Layout";
 
 const AfichierPanierClient = () => {
   const [panier, setPanier] = useState({ articles: [], total: 0 });
   const [loading, setLoading] = useState(true);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationDialog, setMigrationDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,27 +48,9 @@ const AfichierPanierClient = () => {
   const chargerPanier = async () => {
     try {
       setLoading(true);
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-      if (user._id) {
-        // Utilisateur connecté - charger depuis l'API
-        const panierActif = await getPanierActif(user._id);
-        if (panierActif) {
-          const articles = await getArticlesPanier(panierActif._id);
-          const totalData = await getTotalPanier(panierActif._id);
-
-          setPanier({
-            articles: articles,
-            total: totalData.total,
-          });
-        } else {
-          setPanier({ articles: [], total: 0 });
-        }
-      } else {
-        // Visiteur - charger depuis le stockage local
-        const panierLocal = getPanierLocal();
-        setPanier(panierLocal);
-      }
+      // TOUJOURS charger depuis le stockage local
+      const panierLocal = getPanierLocal();
+      setPanier(panierLocal);
     } catch (error) {
       console.error("Erreur lors du chargement du panier:", error);
     } finally {
@@ -73,27 +60,8 @@ const AfichierPanierClient = () => {
 
   const mettreAJourQuantite = async (produitId, nouvelleQuantite) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-      if (user._id) {
-        // Utilisateur connecté - mise à jour via API
-        const panierActif = await getPanierActif(user._id);
-        if (panierActif) {
-          await updateQuantiteArticle(
-            panierActif._id,
-            produitId,
-            nouvelleQuantite
-          );
-        }
-      } else {
-        // Visiteur - mise à jour locale
-        updateQuantiteArticleLocal(produitId, nouvelleQuantite);
-      }
-
-      // Recharger le panier
+      updateQuantiteArticleLocal(produitId, nouvelleQuantite);
       await chargerPanier();
-
-      // Déclencher la mise à jour du compteur
       window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (error) {
       console.error("Erreur lors de la mise à jour de la quantité:", error);
@@ -102,23 +70,8 @@ const AfichierPanierClient = () => {
 
   const supprimerArticle = async (produitId) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-      if (user._id) {
-        // Utilisateur connecté - suppression via API
-        const panierActif = await getPanierActif(user._id);
-        if (panierActif) {
-          await supprimerArticlePanier(panierActif._id, produitId);
-        }
-      } else {
-        // Visiteur - suppression locale
-        supprimerArticleLocal(produitId);
-      }
-
-      // Recharger le panier
+      supprimerArticleLocal(produitId);
       await chargerPanier();
-
-      // Déclencher la mise à jour du compteur
       window.dispatchEvent(new CustomEvent("cartUpdated"));
     } catch (error) {
       console.error("Erreur lors de la suppression de l'article:", error);
@@ -127,20 +80,90 @@ const AfichierPanierClient = () => {
 
   const passerCommande = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const panierLocal = getPanierLocal();
+
+    if (panierLocal.articles.length === 0) {
+      alert(
+        "Votre panier est vide. Veuillez ajouter des produits avant de commander."
+      );
+      return;
+    }
 
     if (user._id) {
-      // Utilisateur connecté - passer à l'étape de paiement
-      navigate("/commande");
+      // Utilisateur connecté - demander confirmation avant migration
+      setMigrationDialog(true);
     } else {
-      // Visiteur - rediriger vers la connexion/inscription
+      // Visiteur - rediriger vers la connexion
       navigate("/connexion", {
         state: {
-          message:
-            "Veuillez vous connecter ou créer un compte pour finaliser votre commande",
+          message: "Veuillez vous connecter pour finaliser votre commande",
           redirectTo: "/panier",
         },
       });
     }
+  };
+  const confirmerMigrationEtCommander = async () => {
+    setMigrationDialog(false);
+    setMigrating(true);
+
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const panierLocal = getPanierLocal();
+
+      if (panierLocal.articles.length === 0) {
+        alert("Votre panier est vide");
+        setMigrating(false);
+        return;
+      }
+
+      // Vérifier si un panier actif existe déjà
+      let panierAPI = await getPanierActif(user.clientInfo?._id);
+
+      if (panierAPI) {
+        // Le mettre inactif avant de créer un nouveau
+        await updatePanier(panierAPI._id, { est_actif: false });
+      }
+
+      // Créer un nouveau panier actif
+      panierAPI = await createPanier({
+        clientId: user.clientInfo?._id,
+        est_actif: true,
+      });
+
+      //  Ajouter chaque article du panier local au nouveau panier
+      for (const article of panierLocal.articles) {
+        try {
+          await ajouterArticlePanier(
+            panierAPI._id,
+            article.produitId,
+            article.quantite
+          );
+        } catch (error) {
+          console.error("Erreur lors de l'ajout d'un article:", error);
+        }
+      }
+      // Créer une commande unique à partir du panier
+      await createCommande(panierAPI._id, { clientId: user.clientInfo?._id });
+      //  Vider le panier local après migration réussie
+      savePanierLocal({ articles: [], total: 0 });
+
+      //Mettre à jour le compteur du panier dans le menu
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+
+      //  Rediriger vers la page de commande
+      navigate("/commandes");
+    } catch (error) {
+      console.error("Erreur lors de la migration du panier:", error);
+      alert(
+        "Erreur lors de la préparation de la commande. Veuillez réessayer."
+      );
+    } finally {
+      setMigrating(false);
+    }
+  };
+
+  const annulerMigration = () => {
+    setMigrationDialog(false);
   };
 
   if (loading) {
@@ -185,12 +208,7 @@ const AfichierPanierClient = () => {
         <Typography
           variant="h5"
           gutterBottom
-          sx={{
-            fontSize: "1.5rem",
-            fontWeight: 600,
-            color: "#333",
-            mb: 3,
-          }}
+          sx={{ fontSize: "1.5rem", fontWeight: 600, color: "#333", mb: 3 }}
         >
           Votre panier
         </Typography>
@@ -204,9 +222,7 @@ const AfichierPanierClient = () => {
                   mb: 2,
                   borderRadius: 2,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  },
+                  "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.15)" },
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
@@ -243,10 +259,7 @@ const AfichierPanierClient = () => {
                       <Typography
                         variant="body2"
                         color="text.secondary"
-                        sx={{
-                          fontSize: "0.9rem",
-                          fontWeight: 500,
-                        }}
+                        sx={{ fontSize: "0.9rem", fontWeight: 500 }}
                       >
                         {new Intl.NumberFormat("fr-TN", {
                           minimumFractionDigits: 3,
@@ -271,9 +284,7 @@ const AfichierPanierClient = () => {
                           disabled={article.quantite <= 1}
                           sx={{
                             border: "1px solid #e0e0e0",
-                            "&:hover": {
-                              backgroundColor: "#f5f5f5",
-                            },
+                            "&:hover": { backgroundColor: "#f5f5f5" },
                           }}
                         >
                           <Remove fontSize="small" />
@@ -286,9 +297,7 @@ const AfichierPanierClient = () => {
                             mx: 1,
                             "& .MuiOutlinedInput-root": {
                               borderRadius: 1,
-                              "& fieldset": {
-                                borderColor: "#e0e0e0",
-                              },
+                              "& fieldset": { borderColor: "#e0e0e0" },
                             },
                           }}
                           inputProps={{
@@ -318,9 +327,7 @@ const AfichierPanierClient = () => {
                           }
                           sx={{
                             border: "1px solid #e0e0e0",
-                            "&:hover": {
-                              backgroundColor: "#f5f5f5",
-                            },
+                            "&:hover": { backgroundColor: "#f5f5f5" },
                           }}
                         >
                           <Add fontSize="small" />
@@ -418,21 +425,13 @@ const AfichierPanierClient = () => {
               <Box display="flex" justifyContent="space-between" mb={3}>
                 <Typography
                   variant="h6"
-                  sx={{
-                    fontSize: "1.1rem",
-                    fontWeight: 600,
-                    color: "#333",
-                  }}
+                  sx={{ fontSize: "1.1rem", fontWeight: 600, color: "#333" }}
                 >
                   Total
                 </Typography>
                 <Typography
                   variant="h6"
-                  sx={{
-                    fontSize: "1.1rem",
-                    fontWeight: 600,
-                    color: "#333",
-                  }}
+                  sx={{ fontSize: "1.1rem", fontWeight: 600, color: "#333" }}
                 >
                   {new Intl.NumberFormat("fr-TN", {
                     minimumFractionDigits: 3,
@@ -446,23 +445,45 @@ const AfichierPanierClient = () => {
                 fullWidth
                 size="large"
                 onClick={passerCommande}
+                disabled={migrating}
                 sx={{
                   py: 1.5,
                   backgroundColor: "#1976d2",
-                  "&:hover": {
-                    backgroundColor: "#1565c0",
-                  },
+                  "&:hover": { backgroundColor: "#1565c0" },
                   fontSize: "0.9rem",
                   fontWeight: 600,
                   textTransform: "uppercase",
                   borderRadius: 1,
                 }}
               >
-                Commander
+                {migrating ? "Traitement en cours..." : "Commander"}
               </Button>
             </Paper>
           </Grid>
         </Grid>
+
+        {/* Dialog de confirmation de migration */}
+        <Dialog open={migrationDialog} onClose={annulerMigration}>
+          <DialogTitle>Confirmer la commande</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Votre panier va être transféré vers votre compte et la commande
+              sera finalisée. Souhaitez-vous continuer ?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={annulerMigration} color="primary">
+              Annuler
+            </Button>
+            <Button
+              onClick={confirmerMigrationEtCommander}
+              color="primary"
+              variant="contained"
+            >
+              Confirmer
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Layout>
   );

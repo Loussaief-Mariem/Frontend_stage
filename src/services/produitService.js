@@ -120,3 +120,61 @@ export const getNouveauxProduits = async () => {
     throw error;
   }
 };
+// Récupérer les produits par ID de catégorie (sans pagination)
+export const getProduitsByCategorieId = async (categorieId) => {
+  try {
+    const res = await api.get(`/produits/categorie/${categorieId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Erreur récupération produits par catégorie:", error);
+    throw error;
+  }
+};
+export const getProduitsByCategorieIdPagination = async (
+  categorieId,
+  page = 1,
+  limit = 12
+) => {
+  try {
+    const res = await api.get(
+      `/produits/categorie/${categorieId}/pagines?page=${page}&limit=${limit}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Erreur récupération produits par catégorie paginés:", error);
+    throw error;
+  }
+};
+////////////::
+// Rechercher des produits par nom
+export const searchProducts = async (query, page = 1, limit = 12) => {
+  try {
+    const res = await api.get(
+      `/produits/recherche?q=${encodeURIComponent(
+        query
+      )}&page=${page}&limit=${limit}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Erreur lors de la recherche:", error);
+
+    // Fallback: récupérer tous les produits en cas d'erreur
+    try {
+      const allProducts = await getProduitsPagines(page, limit);
+      return {
+        produits: allProducts.produits || [],
+        pagination: {
+          page,
+          limit,
+          totalProduits: allProducts.totalProduits || 0,
+          totalPages: allProducts.totalPages || 1,
+          searchQuery: query,
+          exactMatch: false,
+        },
+      };
+    } catch (fallbackError) {
+      console.error("Erreur fallback:", fallbackError);
+      throw error;
+    }
+  }
+};

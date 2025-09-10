@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogActions,
   Button,
   Typography,
   Box,
@@ -79,7 +78,6 @@ const InsertPanierModal = ({ product, open, onClose }) => {
   const handleContinueShopping = () => {
     onClose();
   };
-
   const handleViewCart = () => {
     onClose();
     navigate("/panier");
@@ -91,6 +89,21 @@ const InsertPanierModal = ({ product, open, onClose }) => {
       minimumFractionDigits: 3,
       maximumFractionDigits: 3,
     }).format(price);
+  };
+
+  // Ajoutez cette fonction pour gérer la commande directe
+  const handleCommander = () => {
+    onClose();
+
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (user._id) {
+      // Utilisateur connecté - rediriger vers la commande
+      navigate("/commande");
+    } else {
+      // Visiteur - rediriger vers le panier
+      navigate("/panier");
+    }
   };
 
   return (
@@ -270,7 +283,7 @@ const InsertPanierModal = ({ product, open, onClose }) => {
           <Grid item xs={12}>
             <Button
               variant="contained"
-              onClick={handleViewCart}
+              onClick={handleCommander}
               fullWidth
               sx={{
                 backgroundColor: "#E93E7F",

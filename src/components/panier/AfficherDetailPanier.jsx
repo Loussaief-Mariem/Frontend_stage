@@ -49,9 +49,9 @@ function AfficherDetailPanier({ open, onClose, panier }) {
     }
   };
 
-  const handleDeleteLigne = async (panierId, numLigne) => {
+  const handleDeleteLigne = async (panierId, ligneId) => {
     try {
-      await supprimerLignePanier(panierId, numLigne);
+      await supprimerLignePanier(panierId, ligneId);
       fetchLignes();
     } catch (err) {
       console.error("Erreur suppression ligne:", err);
@@ -112,7 +112,7 @@ function AfficherDetailPanier({ open, onClose, panier }) {
                         <Tooltip title="Modifier">
                           <IconButton
                             size="small"
-                            onClick={() => setLigneToEdit(ligne)} // ✅ ouvre le formulaire
+                            onClick={() => setLigneToEdit(ligne)}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -121,7 +121,7 @@ function AfficherDetailPanier({ open, onClose, panier }) {
                           <IconButton
                             size="small"
                             onClick={() =>
-                              handleDeleteLigne(panier._id, ligne.numLigne)
+                              handleDeleteLigne(panier._id, ligne._id)
                             }
                           >
                             <DeleteIcon fontSize="small" />

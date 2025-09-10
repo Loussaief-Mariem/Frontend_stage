@@ -14,12 +14,17 @@ export const getLignesByPanier = async (panierId) => {
 
 // Modifier une ligne par son id
 export const modifierLigne = async (id, ligneData) => {
-  const res = await api.put(`/ligne-panier/${id}`, ligneData);
+  const res = await api.put(`/ligne-panier/modifier/${id}`, ligneData);
   return res.data;
 };
 
-// Supprimer une ligne dans un panier par panierId et numLigne
-export const supprimerLignePanier = async (panierId, numLigne) => {
-  const res = await api.delete(`/ligne-panier/${panierId}/${numLigne}`);
-  return res.data;
+// Supprimer un produit du panier
+export const supprimerLignePanier = async (panierId, ligneId) => {
+  try {
+    const res = await api.delete(`/ligne-panier/${panierId}/${ligneId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Erreur lors de la suppression du produit:", error);
+    throw error.response?.data || { message: "Erreur serveur" };
+  }
 };

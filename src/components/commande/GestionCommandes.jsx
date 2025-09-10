@@ -332,20 +332,33 @@ const GestionCommandes = () => {
           {selectedCommande && (
             <>
               <Typography variant="body1" gutterBottom>
-                <strong>Client:</strong>{" "}
-                {selectedCommande.clientId?.utilisateurId?.nom}{" "}
+                <strong>Client:</strong>
+                {selectedCommande.clientId?.utilisateurId?.nom}
                 {selectedCommande.clientId?.utilisateurId?.prenom}
+                {console.log(
+                  "Prenom:",
+                  selectedCommande.clientId?.utilisateurId?.prenom
+                )}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <strong>Email:</strong>{" "}
+                <strong>Email:</strong>
                 {selectedCommande.clientId?.utilisateurId?.email}
+                {console.log(
+                  "email:",
+                  selectedCommande.clientId?.utilisateurId?.email
+                )}
+                {console.log("id-Client:", selectedCommande.clientId)}
+                {console.log(
+                  "utilisateur:",
+                  selectedCommande.clientId?.utilisateurId
+                )}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <strong>Date de création:</strong>{" "}
+                <strong>Date de création:</strong>
                 {formatDate(selectedCommande.createdAt)}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <strong>Date de livraison prévue:</strong>{" "}
+                <strong>Date de livraison prévue:</strong>
                 {formatDate(selectedCommande.dateLivraison)}
               </Typography>
               <Typography variant="body1" gutterBottom>
