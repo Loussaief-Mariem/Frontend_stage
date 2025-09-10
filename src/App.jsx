@@ -32,6 +32,7 @@ function App() {
   const [role, setRole] = useState("user");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true); // ← Ajout d'un état de chargement
 
   const updateCartItemCount = async () => {
     try {
@@ -39,32 +40,38 @@ function App() {
       setCartItemCount(count);
     } catch (error) {
       console.error("Erreur lors de la récupération du panier:", error);
-      setCartItemCount(getNombreArticlesLocal());
+      setCartItemCount(0);
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    const user = localStorage.getItem("user");
-    // Affiche dans la console
-    console.log("Token stocké dans le localStorage :", token);
-    console.log("Données utilisateur stockées :", user);
-    if (token && user) {
+    const initializeAuth = () => {
       try {
-        const userData = JSON.parse(user);
-        setIsAuthenticated(true);
-        setRole(userData.role || "user");
-        updateCartItemCount();
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("user");
+
+        console.log("Token:", token);
+        console.log("User data:", user);
+
+        if (token && user) {
+          const userData = JSON.parse(user);
+          setIsAuthenticated(true);
+          setRole(userData.role || "user");
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Erreur lors de l'initialisation de l'auth:", error);
+        // Nettoyage des données corrompues
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        updateCartItemCount();
+        setIsAuthenticated(false);
+        setRole("user");
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      updateCartItemCount();
-    }
+    };
+
+    initializeAuth();
+    updateCartItemCount();
   }, []);
 
   useEffect(() => {
@@ -88,6 +95,11 @@ function App() {
     window.location.href = "/";
   };
 
+  // Afficher un loader pendant l'initialisation
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <Router>
       {/* Admin Layout */}
@@ -109,7 +121,6 @@ function App() {
               mt: "64px",
               minHeight: "100vh",
               backgroundColor: "#fafafa",
-              display: "block",
             }}
           >
             <Box
@@ -121,13 +132,13 @@ function App() {
                 ml: 0,
                 mr: "auto",
                 px: 0,
-                display: "flex",
-                flexDirection: "column",
               }}
             >
               <Routes>
+                {/* Route racine EXPLICITE */}
+                <Route path="/" element={<Dashboard />} />
+
                 {/* Routes admin */}
-                <Route path="*" element={<Dashboard />} />
                 <Route
                   path="/admin/categories"
                   element={<AffichierCategorie />}
@@ -138,7 +149,7 @@ function App() {
                 <Route path="/admin/paniers" element={<Panier />} />
                 <Route path="/admin/commandes" element={<Commandes />} />
 
-                {/* Routes publiques disponibles même pour admin */}
+                {/* Routes publiques */}
                 <Route
                   path="/connexion"
                   element={<Login onLoginSuccess={handleLoginSuccess} />}
@@ -149,14 +160,18 @@ function App() {
                   path="/reset-password/:id/:token"
                   element={<ResetPassword />}
                 />
-                <Route path="*" element={<HomePage />} />
+
+                {/* Catch-all - DOIT ÊTRE LA DERNIÈRE ROUTE */}
+                <Route path="/" element={<Dashboard />} />
               </Routes>
             </Box>
           </Box>
         </Box>
       ) : (
         // Layout User
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+        >
           <Menu
             role={role}
             isAuthenticated={isAuthenticated}
@@ -169,9 +184,12 @@ function App() {
           >
             <Container
               maxWidth="xl"
-              sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 } }}
+              sx={{ px: { xs: 2, sm: 3, md: 4, lg: 4 }, py: 2 }}
             >
               <Routes>
+                {/* Route racine EXPLICITE */}
+                <Route path="/" element={<HomePage />} />
+
                 {/* Routes utilisateurs */}
                 <Route
                   path="/connexion"
@@ -192,7 +210,9 @@ function App() {
                   element={<ProduitsParCategorie />}
                 />
                 <Route path="/produit/:productId" element={<ProductDetail />} />
-                <Route path="*" element={<HomePage />} />
+
+                {/* Catch-all - DOIT ÊTRE LA DERNIÈRE ROUTE */}
+                <Route path="/" element={<HomePage />} />
               </Routes>
             </Container>
           </Box>
