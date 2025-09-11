@@ -331,72 +331,77 @@ const GestionCommandes = () => {
         <DialogContent>
           {selectedCommande && (
             <>
-              <Typography variant="body1" gutterBottom>
-                <strong>Client:</strong>
-                {selectedCommande.clientId?.utilisateurId?.nom}
-                {selectedCommande.clientId?.utilisateurId?.prenom}
-                {console.log(
-                  "Prenom:",
-                  selectedCommande.clientId?.utilisateurId?.prenom
-                )}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Email:</strong>
-                {selectedCommande.clientId?.utilisateurId?.email}
-                {console.log(
-                  "email:",
-                  selectedCommande.clientId?.utilisateurId?.email
-                )}
-                {console.log("id-Client:", selectedCommande.clientId)}
-                {console.log(
-                  "utilisateur:",
-                  selectedCommande.clientId?.utilisateurId
-                )}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Date de création:</strong>
-                {formatDate(selectedCommande.createdAt)}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Date de livraison prévue:</strong>
-                {formatDate(selectedCommande.dateLivraison)}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Total:</strong> {selectedCommande.total?.toFixed(3)} TND
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Statut commande:</strong>{" "}
-                <Chip
-                  label={selectedCommande.statut}
-                  color={getStatusColor(selectedCommande.statut)}
-                  size="small"
-                />
-              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Client:</strong>{" "}
+                  {selectedCommande.clientId?.utilisateurId?.nom}{" "}
+                  {selectedCommande.clientId?.utilisateurId?.prenom}
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Email:</strong>{" "}
+                  {selectedCommande.clientId?.utilisateurId?.email}
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Date de création:</strong>{" "}
+                  {formatDate(selectedCommande.createdAt)}
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Date de livraison prévue:</strong>{" "}
+                  {formatDate(selectedCommande.dateLivraison)}
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Total:</strong> {selectedCommande.total?.toFixed(3)}{" "}
+                  TND
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Statut commande:</strong>{" "}
+                  <Chip
+                    label={selectedCommande.statut}
+                    color={getStatusColor(selectedCommande.statut)}
+                    size="small"
+                  />
+                </Typography>
+              </Box>
 
-              <Typography variant="body1" gutterBottom>
-                <strong>Facture:</strong>{" "}
-                {selectedCommande.factureId ? (
-                  <>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body1" gutterBottom>
+                  <strong>Facture:</strong>{" "}
+                  {selectedCommande.factureId ? (
                     <Chip
                       label={selectedCommande.factureId.statut}
                       color={getStatusColor(selectedCommande.factureId.statut)}
                       size="small"
                     />
-                    <Typography variant="body2" sx={{ mt: 1 }}>
+                  ) : (
+                    <Chip label="Non générée" color="error" size="small" />
+                  )}
+                </Typography>
+
+                {selectedCommande.factureId && (
+                  <>
+                    <Typography variant="body2" sx={{ mt: 1, ml: 2 }}>
                       <strong>Numéro:</strong>{" "}
                       {selectedCommande.factureId.numFact}
                     </Typography>
                     {selectedCommande.factureId.estEnvoyee && (
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ ml: 2 }}>
                         <strong>Envoyée le:</strong>{" "}
                         {formatDate(selectedCommande.factureId.dateEnvoi)}
                       </Typography>
                     )}
                   </>
-                ) : (
-                  <Chip label="Non générée" color="error" size="small" />
                 )}
-              </Typography>
+              </Box>
             </>
           )}
         </DialogContent>

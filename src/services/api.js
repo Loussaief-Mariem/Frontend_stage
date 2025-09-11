@@ -2,10 +2,12 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL:
-    "https://backend-stage-nacz9gcse-mariems-projects-43bec416.vercel.app/api",
+    "https://backend-stage-a86gxs8pc-mariems-projects-43bec416.vercel.app/api",
 });
 //import.meta.env.VITE_API_URL,
 // // import.meta.env.VITE_API_URL,
+//    "https://backend-stage-nacz9gcse-mariems-projects-43bec416.vercel.app/api",
+
 //  Intercepteur : Ajouter Authorization: Bearer ${token} si disponible
 // Ajouter le token JWT automatiquement dans chaque requête
 

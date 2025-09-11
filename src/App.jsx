@@ -32,7 +32,7 @@ function App() {
   const [role, setRole] = useState("user");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true); // ← Ajout d'un état de chargement
+  const [isLoading, setIsLoading] = useState(true);
 
   const updateCartItemCount = async () => {
     try {
@@ -60,7 +60,6 @@ function App() {
         }
       } catch (error) {
         console.error("Erreur lors de l'initialisation de l'auth:", error);
-        // Nettoyage des données corrompues
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setIsAuthenticated(false);
@@ -95,7 +94,6 @@ function App() {
     window.location.href = "/";
   };
 
-  // Afficher un loader pendant l'initialisation
   if (isLoading) {
     return <div>Chargement...</div>;
   }
@@ -149,7 +147,7 @@ function App() {
                 <Route path="/admin/paniers" element={<Panier />} />
                 <Route path="/admin/commandes" element={<Commandes />} />
 
-                {/* Routes publiques */}
+                {/* Routes publiques accessibles aux admin */}
                 <Route
                   path="/connexion"
                   element={<Login onLoginSuccess={handleLoginSuccess} />}
@@ -162,7 +160,7 @@ function App() {
                 />
 
                 {/* Catch-all - DOIT ÊTRE LA DERNIÈRE ROUTE */}
-                <Route path="/" element={<Dashboard />} />
+                <Route path="*" element={<Dashboard />} />
               </Routes>
             </Box>
           </Box>
@@ -190,7 +188,7 @@ function App() {
                 {/* Route racine EXPLICITE */}
                 <Route path="/" element={<HomePage />} />
 
-                {/* Routes utilisateurs */}
+                {/* Routes publiques accessibles à tous */}
                 <Route
                   path="/connexion"
                   element={<Login onLoginSuccess={handleLoginSuccess} />}
@@ -203,7 +201,6 @@ function App() {
                 />
                 <Route path="/contact" element={<ContactClient />} />
                 <Route path="/panier" element={<AfichierPanierClient />} />
-                <Route path="/commandes" element={<MesCommandes />} />
                 <Route path="/recherche" element={<RechercheProduit />} />
                 <Route
                   path="/categorie/:categorieId"
@@ -211,8 +208,13 @@ function App() {
                 />
                 <Route path="/produit/:productId" element={<ProductDetail />} />
 
+                {/* Routes protégées - seulement pour utilisateurs connectés */}
+                {isAuthenticated && (
+                  <Route path="/commandes" element={<MesCommandes />} />
+                )}
+
                 {/* Catch-all - DOIT ÊTRE LA DERNIÈRE ROUTE */}
-                <Route path="/" element={<HomePage />} />
+                <Route path="*" element={<HomePage />} />
               </Routes>
             </Container>
           </Box>

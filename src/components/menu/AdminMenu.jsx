@@ -13,6 +13,7 @@ import {
   Divider,
   IconButton,
   Button,
+  ListItemButton, // ← Ajouter ListItemButton
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -116,8 +117,8 @@ function AdminMenu({ role, onLogout }) {
 
         <List>
           {menuItems[role].map((item) => (
-            <ListItem
-              button
+            // REMPLACER ListItem par ListItemButton
+            <ListItemButton
               key={item.path}
               component="a"
               href={item.path}
@@ -142,7 +143,7 @@ function AdminMenu({ role, onLogout }) {
                   color: "#5D4037",
                 }}
               />
-            </ListItem>
+            </ListItemButton>
           ))}
         </List>
       </Drawer>
